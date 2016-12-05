@@ -41,7 +41,7 @@ module Solrizer
           config.send(key)
         end
       end
-      
+
       field_suffix.join
     end
 
@@ -65,6 +65,10 @@ module Solrizer
             'b'
           when :long
             'lt'
+          when :descendent_path
+            'dp'
+          when :ancestor_path
+            'ap'
           else
             raise Solrizer::InvalidIndexDescriptor, "Invalid datatype `#{type.inspect}'. Must be one of: :date, :time, :text, :text_en, :string, :symbol, :integer, :boolean"
           end

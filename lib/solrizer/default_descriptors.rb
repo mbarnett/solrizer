@@ -8,7 +8,7 @@ module Solrizer
     def self.stored_searchable
       @stored_searchable ||= Descriptor.new(stored_searchable_field_definition, converter: searchable_converter, requires_type: true)
     end
-    
+
     # The suffix produced depends on the type parameter -- produces suffixes:
     #  _teim - for strings or text fields
     #  _dtim - for dates
@@ -16,7 +16,7 @@ module Solrizer
     def self.searchable
       @searchable ||= Descriptor.new(searchable_field_definition, converter: searchable_converter, requires_type: true)
     end
-    
+
     # Takes fields which are stored as strings, but we want indexed as dates.  (e.g. "November 6th, 2012")
     # produces suffixes:
     #  _dtsim - for dates
@@ -37,7 +37,7 @@ module Solrizer
 
     # The suffix produced depends on the type parameter -- produces suffixes:
     #  _tei - for text fields
-    #  _si - for strings 
+    #  _si - for strings
     #  _dti - for dates
     #  _ii - for integers
     def self.sortable
@@ -64,7 +64,15 @@ module Solrizer
     def self.simple
       @simple ||= Descriptor.new(lambda {|field_type| [field_type, :indexed]})
     end
-    
+
+    def self.descendent_path
+      @path ||= Descriptor.new(:descendent_path, :stored, :indexed, :multivalued)
+    end
+
+    def self.ancestor_path
+      @path ||= Descriptor.new(:ancestor_path, :stored, :indexed, :multivalued)
+    end
+
     protected
 
     def self.searchable_field_definition
@@ -104,20 +112,20 @@ module Solrizer
 
     def self.dateable_converter
       lambda do |type|
-        lambda do |val| 
+        lambda do |val|
           begin
             iso8601_date(Date.parse(val))
           rescue ArgumentError
-            nil 
+            nil
           end
         end
       end
     end
-    
+
     def self.iso8601_date(value)
-      begin 
+      begin
         if value.is_a?(Date) || value.is_a?(Time)
-          DateTime.parse(value.to_s).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ') 
+          DateTime.parse(value.to_s).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
         elsif !value.empty?
           DateTime.parse(value).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
         end
