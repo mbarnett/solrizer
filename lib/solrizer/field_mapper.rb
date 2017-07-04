@@ -3,8 +3,8 @@ require 'active_support/core_ext/string/inflections'
 module Solrizer
 
   class SolrizerError < RuntimeError; end #nodoc#
-  class InvalidIndexDescriptor < SolrizerError; end #nodoc# 
-  class UnknownIndexMacro < SolrizerError; end #nodoc# 
+  class InvalidIndexDescriptor < SolrizerError; end #nodoc#
+  class UnknownIndexMacro < SolrizerError; end #nodoc#
   # Maps Term names and values to Solr fields, based on the Term's data type and any index_as options.
   #
   # The basic structure of a mapper is:
@@ -12,7 +12,7 @@ module Solrizer
   # == Mapping on Index Type
   #
   # To add a custom mapper to the default mapper
-  # 
+  #
   #   module Solrizer::DefaultDescriptors
   #     def self.some_field_type
   #       @some_field_type ||= Descriptor.new(:string, :stored, :indexed, :multivalued)
@@ -36,7 +36,7 @@ module Solrizer
   #
   # == Custom Value Converters
   #
-  # All of the above applies to the generation of Solr names. Mappers can also provide custom conversion logic for the 
+  # All of the above applies to the generation of Solr names. Mappers can also provide custom conversion logic for the
   # generation of Solr values by attaching a custom value converter block to a data type:
   #
   #   require 'time'
@@ -65,7 +65,7 @@ module Solrizer
   # In addition to the normal field mappings, Solrizer gives special treatment to an ID field. If you want that
   # logic (and you probably do), specify a name for this field:
   #
-  #   Solrizer::FieldMapper.id_field  = 'id' 
+  #   Solrizer::FieldMapper.id_field  = 'id'
   #
   #
   # == Extending the Default
@@ -96,11 +96,11 @@ module Solrizer
     end
 
   end
-  
+
   class FieldMapper
 
     # ------ Instance methods ------
-    
+
     attr_reader :id_field, :default_index_types
     class_attribute :id_field
     class_attribute :descriptors
@@ -108,7 +108,7 @@ module Solrizer
     self.descriptors = [DefaultDescriptors]
     self.id_field = 'id'
 
-    
+
     def initialize
       self.id_field = self.class.id_field
     end
@@ -142,14 +142,14 @@ module Solrizer
     end
 
     # @param [Symbol, String, Descriptor] index_type is a Descriptor, a symbol that references a method that returns a Descriptor, or a string which will be used as the suffix.
-    # @return [Descriptor] 
+    # @return [Descriptor]
     def indexer(index_type)
       index_type = case index_type
       when Symbol
         index_type_macro(index_type)
       when String
         StringDescriptor.new(index_type)
-      when Descriptor 
+      when Descriptor
         index_type
       else
         raise Solrizer::InvalidIndexDescriptor, "#{index_type.class} is not a valid indexer_type. Use a String, Symbol or Descriptor."
@@ -163,7 +163,7 @@ module Solrizer
     def extract_type(value)
       case value
       when NilClass
-      when Fixnum
+      when Integer
         :integer
       when DateTime
         :time
@@ -176,10 +176,10 @@ module Solrizer
 
     # Given a field name-value pair, a data type, and an array of index types, returns a hash of
     # mapped names and values. The values in the hash are _arrays_, and may contain multiple values.
-    
+
     def solr_names_and_values(field_name, field_value, index_types)
       return {} if field_value.nil?
-      
+
       # Determine the set of index types
       index_types = Array(index_types)
       index_types.uniq!
@@ -189,14 +189,14 @@ module Solrizer
           index_types.delete $1.to_sym  # foo
         end
       end
-      
+
       # Map names and values
-      
+
       results = {}
 
       # Time seems to extend enumerable, so wrap it so we don't interate over each of its elements.
       field_value = [field_value] if field_value.kind_of? Time
-      
+
       index_types.each do |index_type|
         Array(field_value).each do |single_value|
           # Get mapping for field
@@ -219,7 +219,7 @@ module Solrizer
           else
             single_value.to_s
           end
-          
+
           # Add mapped name & value, unless it's a duplicate
           if descriptor.evaluate_suffix(data_type).multivalued?
             values = (results[name] ||= [])
@@ -230,7 +230,7 @@ module Solrizer
           end
         end
       end
-        
+
       results
     end
   end
