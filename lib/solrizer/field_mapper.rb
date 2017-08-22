@@ -160,6 +160,20 @@ module Solrizer
       index_type
     end
 
+    # wow such a concept
+    def hey_maybe_lets_use_literally_the_actual_type_specified(type)
+      case type
+      when :date
+        # why is this different?
+        # why were people calling index.type :date when it does ABSOLUTELY NOTHING?
+        # all valid questions!
+        # life's a BIG MYSTERY!
+        :time
+      else
+        type
+      end
+    end
+
     def extract_type(value)
       case value
       when NilClass
@@ -177,7 +191,7 @@ module Solrizer
     # Given a field name-value pair, a data type, and an array of index types, returns a hash of
     # mapped names and values. The values in the hash are _arrays_, and may contain multiple values.
 
-    def solr_names_and_values(field_name, field_value, index_types)
+    def solr_names_and_values(field_name, field_value, index_types, literally_the_actual_type_specified:nil)
       return {} if field_value.nil?
 
       # Determine the set of index types
@@ -201,8 +215,11 @@ module Solrizer
         Array(field_value).each do |single_value|
           # Get mapping for field
           descriptor = indexer(index_type)
+
           data_type = extract_type(single_value)
-          name, converter = descriptor.name_and_converter(field_name, type: data_type)
+          literal_declared_type = literally_the_actual_type_specified.present? ? hey_maybe_lets_use_literally_the_actual_type_specified(literally_the_actual_type_specified) : data_type
+
+          name, converter = descriptor.name_and_converter(field_name, type: data_type, literal_declared_type: literal_declared_type)
           next unless name
 
           # Is there a custom converter?

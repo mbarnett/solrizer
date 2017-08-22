@@ -39,10 +39,11 @@ module Solrizer
     # @params [String,Date,Array] value the value (or array of values) to be inserted
     # @params [Array,Hash] indexer_args the arguments that find the indexer
     # @returns [Hash] doc the document that was provided with the new field inserted
-    def insert_field(doc, name, value, *indexer_args)
+    def insert_field(doc, name, value, *indexer_args, literally_the_actual_type_specified:nil)
       # adding defaults indexer
       indexer_args = [:stored_searchable] if indexer_args.empty?
-      default_field_mapper.solr_names_and_values(name, value, indexer_args).each do |k, v|
+      default_field_mapper.solr_names_and_values(name, value, indexer_args,
+                                                 literally_the_actual_type_specified:literally_the_actual_type_specified).each do |k, v|
         doc[k] ||= []
         if v.is_a? Array
           doc[k] += v
@@ -57,7 +58,7 @@ module Solrizer
     # @params [String] name the name of the field (without the suffix)
     # @params [String,Date] value the value to be inserted
     # @params [Array,Hash] indexer_args the arguments that find the indexer
-    # @returns [Hash] doc the document that was provided with the new field (replacing any field with the same name) 
+    # @returns [Hash] doc the document that was provided with the new field (replacing any field with the same name)
     def set_field(doc, name, value, *indexer_args)
       # adding defaults indexer
       indexer_args = [:stored_searchable] if indexer_args.empty?
